@@ -1,3 +1,3 @@
-module sharedPackages/internal/api
+module github.com/omarkamel02/SharedPackages
 
-go 1.18
+go 1.23
