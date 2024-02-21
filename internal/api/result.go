@@ -1,4 +1,4 @@
-package api
+package SharedPackages
 
 type ApplicationResult[T any] struct {
 	Data       T
