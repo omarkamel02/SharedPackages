@@ -7,8 +7,16 @@ type HttpCodeMapper struct {
 }
 
 type HttpResult struct {
-	HttpCode          int
-	ApplicationResult *ApplicationResult[any]
+	httpCode          int
+	applicationResult *ApplicationResult[any]
+}
+
+func (httpresult *HttpResult) HttpCode() int {
+	return httpresult.httpCode
+}
+
+func (httpresult *HttpResult) Body() *ApplicationResult[any] {
+	return httpresult.applicationResult
 }
 
 func NewHttpCodeMapper(httpCodeMap map[int]int) *HttpCodeMapper {
@@ -26,8 +34,8 @@ func (codemapper *HttpCodeMapper) getHttpCode(applicationcode int) int {
 func (codemapper *HttpCodeMapper) GetHttpResponse(applicationResult *ApplicationResult[any]) HttpResult {
 	httpcode := codemapper.getHttpCode(applicationResult.StatusCode)
 	if httpcode == http.StatusInternalServerError {
-		return HttpResult{HttpCode: httpcode, ApplicationResult: nil}
+		return HttpResult{httpCode: httpcode, applicationResult: nil}
 	} else {
-		return HttpResult{HttpCode: httpcode, ApplicationResult: applicationResult}
+		return HttpResult{httpCode: httpcode, applicationResult: applicationResult}
 	}
 }

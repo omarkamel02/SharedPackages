@@ -21,6 +21,24 @@ type Money struct {
 	preciseAmount  int64
 }
 
+func (m *Money) CentAmount() int64 {
+	return m.centAmount
+}
+func (m *Money) CurrencyCode() string {
+	return m.currencyCode
+}
+
+func (m *Money) FractionDigits() int64 {
+	return m.fractionDigits
+}
+
+func (m *Money) MoneyType() MoneyType {
+	return m.moneytype
+}
+func (m *Money) PreciseAmount() int64 {
+	return m.preciseAmount
+}
+
 // UnmarshalJSON unmarshals JSON data into the Money object.
 func (m *Money) UnmarshalJSON(data []byte) error {
 	var tmp struct {
