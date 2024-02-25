@@ -6,16 +6,16 @@ type HttpCodeMapper struct {
 	httpCodeMap map[int]int
 }
 
-type HttpResult struct {
+type HttpResult[T any] struct {
 	httpCode          int
-	applicationResult *ApplicationResult[any]
+	applicationResult *ApplicationResult[T]
 }
 
-func (httpresult *HttpResult) HttpCode() int {
+func (httpresult *HttpResult[any]) HttpCode() int {
 	return httpresult.httpCode
 }
 
-func (httpresult *HttpResult) Body() *ApplicationResult[any] {
+func (httpresult *HttpResult[any]) Body() *ApplicationResult[any] {
 	return httpresult.applicationResult
 }
 
@@ -31,11 +31,21 @@ func (codemapper *HttpCodeMapper) getHttpCode(applicationcode int) int {
 	return httpcode
 }
 
-func (codemapper *HttpCodeMapper) GetHttpResponse(applicationResult *ApplicationResult[any]) HttpResult {
-	httpcode := codemapper.getHttpCode(applicationResult.StatusCode)
+func GetHttpResponse[T any](s *HttpCodeMapper, applicationResult *ApplicationResult[T]) HttpResult[T] {
+	httpcode := s.getHttpCode(applicationResult.StatusCode)
 	if httpcode == http.StatusInternalServerError {
-		return HttpResult{httpCode: httpcode, applicationResult: nil}
+		return HttpResult[T]{httpCode: httpcode, applicationResult: nil}
 	} else {
-		return HttpResult{httpCode: httpcode, applicationResult: applicationResult}
+		return HttpResult[T]{httpCode: httpcode, applicationResult: applicationResult}
 	}
+}
+
+func Example() {
+
+	httpcodemap := NewHttpCodeMapper(map[int]int{1: 405})
+
+	sstp := NewApplicationResult("omar", 1, "ASdas")
+
+	GetHttpResponse[string](httpcodemap, &sstp)
+
 }

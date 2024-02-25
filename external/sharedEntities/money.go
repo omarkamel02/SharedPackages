@@ -2,6 +2,7 @@ package SharedPackages
 
 import (
 	"encoding/json"
+	"math"
 )
 
 // MoneyType represents the type of money object.
@@ -22,7 +23,13 @@ type Money struct {
 }
 
 func (m *Money) CentAmount() int64 {
-	return m.centAmount
+
+	if m.moneytype == MoneyTypeCentPrecision {
+		return m.centAmount
+	} else {
+		floatresult := (float64(m.preciseAmount) / (math.Pow(10, float64(m.fractionDigits)))) * float64(math.Pow(10, float64(CurrencyFractions[m.currencyCode])))
+		return int64(math.Floor(floatresult))
+	}
 }
 func (m *Money) CurrencyCode() string {
 	return m.currencyCode
