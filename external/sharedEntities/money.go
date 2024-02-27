@@ -98,7 +98,7 @@ func NewMoney(preciseAmount int64, fractionDigits int64, currencyCode string) (m
 
 		currencyCode:   currencyCode,
 		fractionDigits: fractionDigits,
-		preciseAmount:  0,
+		preciseAmount:  preciseAmount,
 	}, nil
 }
 
