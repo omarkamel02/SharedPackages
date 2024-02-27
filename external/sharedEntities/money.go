@@ -3,33 +3,30 @@ package SharedPackages
 import (
 	"encoding/json"
 	"math"
+
+	"github.com/go-playground/validator"
 )
 
 // MoneyType represents the type of money object.
 type MoneyType string
 
-const (
-	MoneyTypeCentPrecision MoneyType = "CentPrecision"
-	MoneyTypeHighPrecision MoneyType = "HighPrecision"
-)
+const ()
 
 // Money represents a monetary value with a specific currency.
 type Money struct {
-	centAmount     int64
 	currencyCode   string
 	fractionDigits int64
-	moneytype      MoneyType
 	preciseAmount  int64
 }
 
-func (m *Money) CentAmount() int64 {
+func (m *Money) CentAmount() float64 {
 
-	if m.moneytype == MoneyTypeCentPrecision {
-		return m.centAmount
+	if m.fractionDigits == CurrencyFractions[m.currencyCode] {
+		return float64(m.preciseAmount)
 	} else {
-		floatresult := (float64(m.preciseAmount) / (math.Pow(10, float64(m.fractionDigits)))) * float64(math.Pow(10, float64(CurrencyFractions[m.currencyCode])))
-		return int64(math.Floor(floatresult))
+		return float64(m.preciseAmount) / (math.Pow(10, float64(m.fractionDigits-CurrencyFractions[m.currencyCode])))
 	}
+
 }
 func (m *Money) CurrencyCode() string {
 	return m.currencyCode
@@ -39,99 +36,78 @@ func (m *Money) FractionDigits() int64 {
 	return m.fractionDigits
 }
 
-func (m *Money) MoneyType() MoneyType {
-	return m.moneytype
-}
 func (m *Money) PreciseAmount() int64 {
 	return m.preciseAmount
 }
 
 // UnmarshalJSON unmarshals JSON data into the Money object.
 func (m *Money) UnmarshalJSON(data []byte) error {
+
+	validate := validator.New()
 	var tmp struct {
-		CentAmount     *int64    `json:"centAmount,omitempty"`
-		CurrencyCode   string    `json:"currencyCode"`
-		FractionDigits int64     `json:"fractionDigits,omitempty"`
-		Type           MoneyType `json:"type"`
-		PreciseAmount  int64     `json:"preciseAmount,omitempty"`
+		CurrencyCode   string `json:"currencyCode" validate:"required" `
+		FractionDigits int64  `json:"fractionDigits" validate:"lte=20"`
+		PreciseAmount  int64  `json:"preciseAmount" validate:"required"`
 	}
 
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 
+	err := validate.Struct(tmp)
+
+	if err != nil {
+		return &BadMoneyValue{}
+	}
+
 	if _, ok := CurrencyFractions[tmp.CurrencyCode]; !ok {
 		return &CurrencyNotSupported{}
 	}
 
-	if tmp.Type == MoneyTypeCentPrecision && tmp.CentAmount == nil {
-		return &CentAmountMustPresent{}
-	}
-
-	if tmp.Type == MoneyTypeCentPrecision {
-		tmp.FractionDigits = CurrencyFractions[tmp.CurrencyCode]
-	} else {
-		if tmp.PreciseAmount > 20 {
-			return &TooHighFractionDigits{}
-		}
-	}
-
-	if tmp.Type == MoneyTypeHighPrecision && tmp.FractionDigits <= CurrencyFractions[tmp.CurrencyCode] {
-		return &TooLowFractionDigits{}
-	}
-
-	m.centAmount = *tmp.CentAmount
 	m.currencyCode = tmp.CurrencyCode
-	m.fractionDigits = tmp.FractionDigits
-	m.moneytype = tmp.Type
+
+	if tmp.FractionDigits == 0 {
+		m.fractionDigits = CurrencyFractions[tmp.CurrencyCode]
+	} else if tmp.FractionDigits < CurrencyFractions[tmp.CurrencyCode] {
+		return &BadMoneyValue{}
+	} else {
+		m.fractionDigits = tmp.FractionDigits
+	}
+
+	m.preciseAmount = tmp.PreciseAmount
+
 	return nil
 }
 
-// NewMoney creates a new Money object with the given cent amount, currency code, fraction digits, and type.
-func NewCentPrecisionMoney(centAmount int64, currencyCode string) (money *Money, err error) {
+// NewMoney creates a new Money object with the given  currency code, fraction digits, and type.
+func NewMoney(preciseAmount int64, fractionDigits int64, currencyCode string) (money *Money, err error) {
 
 	if _, ok := CurrencyFractions[currencyCode]; !ok {
 		return nil, &CurrencyNotSupported{}
-	}
-
-	return &Money{
-		centAmount:     centAmount,
-		currencyCode:   currencyCode,
-		fractionDigits: CurrencyFractions[currencyCode],
-		moneytype:      MoneyTypeCentPrecision,
-		preciseAmount:  0,
-	}, nil
-}
-
-// NewMoney creates a new Money object with the given cent amount, currency code, fraction digits, and type.
-func NewHighPrecisionnMoney(currencyCode string, preciseAmount int64, fractionDigits int64) (money *Money, err error) {
-
-	if _, ok := CurrencyFractions[currencyCode]; !ok {
-		return nil, &CurrencyNotSupported{}
-	}
-
-	if fractionDigits <= CurrencyFractions[currencyCode] {
-		return nil, &TooLowFractionDigits{}
 	}
 
 	if fractionDigits > 20 {
-		return nil, &TooHighFractionDigits{}
+		return nil, &BadMoneyValue{}
+	}
+	if fractionDigits == 0 {
+		fractionDigits = CurrencyFractions[currencyCode]
+	} else if fractionDigits < CurrencyFractions[currencyCode] {
+		return nil, &BadMoneyValue{}
 	}
 	return &Money{
-		centAmount:     0,
+
 		currencyCode:   currencyCode,
 		fractionDigits: fractionDigits,
-		moneytype:      MoneyTypeHighPrecision,
-		preciseAmount:  preciseAmount,
+		preciseAmount:  0,
 	}, nil
 }
 
 // MarshalJSON marshals the Money object to JSON.
 func (m *Money) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
-		"centAmount":     m.centAmount,
+
 		"currencyCode":   m.currencyCode,
 		"fractionDigits": m.fractionDigits,
-		"type":           m.moneytype,
+		"preciseAmount":  m.preciseAmount,
 	})
 }

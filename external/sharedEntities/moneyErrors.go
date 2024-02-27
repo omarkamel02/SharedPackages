@@ -7,23 +7,9 @@ func (*CurrencyNotSupported) Error() string {
 	return ""
 }
 
-type CentAmountMustPresent struct {
+type BadMoneyValue struct {
 }
 
-func (*CentAmountMustPresent) Error() string {
-	return ""
-}
-
-type TooHighFractionDigits struct {
-}
-
-func (*TooHighFractionDigits) Error() string {
-	return ""
-}
-
-type TooLowFractionDigits struct {
-}
-
-func (*TooLowFractionDigits) Error() string {
+func (*BadMoneyValue) Error() string {
 	return ""
 }
