@@ -28,6 +28,16 @@ func (m *Money) CentAmount() float64 {
 	}
 
 }
+
+func (m *Money) Amount() float64 {
+
+	if m.fractionDigits == CurrencyFractions[m.currencyCode] {
+		return float64(m.preciseAmount)
+	} else {
+		return float64(m.preciseAmount) / (math.Pow(10, float64(m.fractionDigits)))
+	}
+
+}
 func (m *Money) CurrencyCode() string {
 	return m.currencyCode
 }
