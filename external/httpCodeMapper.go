@@ -1,6 +1,9 @@
 package SharedPackages
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 type HttpCodeMapper struct {
 	httpCodeMap map[int]int
@@ -9,6 +12,13 @@ type HttpCodeMapper struct {
 type HttpResult[T any] struct {
 	httpCode          int
 	applicationResult *ApplicationResult[T]
+}
+
+func (hr *HttpResult[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+
+		"Result": hr.applicationResult,
+	})
 }
 
 func (httpresult *HttpResult[any]) HttpCode() int {
