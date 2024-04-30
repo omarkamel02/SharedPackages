@@ -1,6 +1,10 @@
 package sharedValueObjects
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/go-playground/validator"
+)
 
 // Define a generic struct LocalData
 type LocalData struct {
@@ -29,6 +33,14 @@ func (ld *LocalData) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &lData); err != nil {
 		return err
 	}
+
+	validate := validator.New()
+	err := validate.Struct(lData)
+	if err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		return validationErrors
+	}
+
 	ld.Name = lData.Name
 	ld.Slug = lData.Slug
 	ld.Description = lData.Description
