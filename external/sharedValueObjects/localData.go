@@ -30,7 +30,7 @@ func (ld *LocalData) UnmarshalJSON(data []byte) error {
 		Name           string `json:"name" validate:"required"`
 		Slug           string `json:"slug" validate:"required"`
 		Description    string `json:"description" validate:"required"`
-		VariantMessage string `json:"variant_message" validate:"required"`
+		VariantMessage string `json:"variant_message"`
 	}
 
 	if err := json.Unmarshal(data, &lData); err != nil {
