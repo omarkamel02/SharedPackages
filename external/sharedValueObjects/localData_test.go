@@ -10,7 +10,6 @@ func TestLocalData_MarshalJSON(t *testing.T) {
 	// Create a sample LocalData instance
 	ld := LocalData{
 		Name:        "Example",
-		Slug:        "example",
 		Description: "This is an example",
 	}
 
@@ -43,7 +42,6 @@ func TestLocalData_UnmarshalJSON(t *testing.T) {
 	// Define the expected LocalData instance after unmarshaling
 	expectedLD := LocalData{
 		Name:        "Test",
-		Slug:        "test",
 		Description: "This is a test",
 	}
 

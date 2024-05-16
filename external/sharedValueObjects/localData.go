@@ -9,7 +9,6 @@ import (
 // Define a generic struct LocalData
 type LocalData struct {
 	Name           string
-	Slug           string
 	Description    string
 	VariantMessage string
 }
@@ -18,7 +17,6 @@ type LocalData struct {
 func (ld *LocalData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
 		"name":            ld.Name,
-		"slug":            ld.Slug,
 		"description":     ld.Description,
 		"variant_message": ld.VariantMessage,
 	})
@@ -28,8 +26,7 @@ func (ld *LocalData) MarshalJSON() ([]byte, error) {
 func (ld *LocalData) UnmarshalJSON(data []byte) error {
 	var lData struct {
 		Name           string `json:"name" validate:"required"`
-		Slug           string `json:"slug" validate:"required"`
-		Description    string `json:"description" validate:"required"`
+		Description    string `json:"description"`
 		VariantMessage string `json:"variant_message"`
 	}
 
@@ -45,7 +42,6 @@ func (ld *LocalData) UnmarshalJSON(data []byte) error {
 	}
 
 	ld.Name = lData.Name
-	ld.Slug = lData.Slug
 	ld.Description = lData.Description
 	ld.VariantMessage = lData.VariantMessage
 	return nil
