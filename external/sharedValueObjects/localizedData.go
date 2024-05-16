@@ -22,8 +22,8 @@ func (ld *LocalizedData[T]) MarshalJSON() ([]byte, error) {
 // Implement UnmarshalJSON method for LocalizedData
 func (ld *LocalizedData[T]) UnmarshalJSON(data []byte) error {
 	var _lData struct {
-		Lang string `json:"lang"`
-		Data T      `json:"data"`
+		Lang string `json:"lang" validate:"required"`
+		Data T      `json:"data" validate:"required"`
 	}
 
 	if err := json.Unmarshal(data, &_lData); err != nil {
