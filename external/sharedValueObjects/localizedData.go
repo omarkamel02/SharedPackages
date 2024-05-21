@@ -2,6 +2,8 @@ package sharedValueObjects
 
 import (
 	"encoding/json"
+
+	"github.com/go-playground/validator"
 )
 
 // Define a generic struct LocalizedData
@@ -29,7 +31,12 @@ func (ld *LocalizedData[T]) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &_lData); err != nil {
 		return err
 	}
-
+	validate := validator.New()
+	err := validate.Struct(_lData)
+	if err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		return validationErrors
+	}
 	ld.Lang = _lData.Lang
 	ld.LocalData = _lData.Data
 	return nil
